@@ -1,0 +1,28 @@
+{
+    "name": "hapi-session-mongo",
+    "version": "0.0.0",
+    "description": "Hapi Session Store for Hapijs",
+    "author": "Jacob Morton <mkoopajr@gmail.com>",
+    "engines": {
+        "node": ">=0.10.30"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "main": "./lib/hapi-session-mongo",
+    "dependencies": {
+        "hoek": "~2.4.1",
+        "iron": "~2.1.2",
+        "mongodb": "~1.4.10"
+    },
+    "licenses": [
+        {
+            "type": "BSD",
+            "url": "http://github.com/Mkoopajr/hapi-session-mongo/blob/master/LICENSE"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/Mkoopajr/hapi-session-mongo.git"
+    }
+}
