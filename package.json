@@ -15,6 +15,13 @@
         "iron": "~2.1.2",
         "mongodb": "~1.4.10"
     },
+    "devDependencies": {
+        "istanbul": "~0.3.2",
+        "vows": "~0.7.0"
+    },
+    "scripts": {
+        "test": "istanbul cover --print both vows -- --spec ./tests/*.js"
+    },
     "licenses": [
         {
             "type": "BSD",
