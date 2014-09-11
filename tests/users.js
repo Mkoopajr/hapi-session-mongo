@@ -1,14 +1,35 @@
-var options = {
-    db: 'users',
-    name: 'sessionHandler',
-    pwd: 'supersecretpassword',
-    ssl: true
-};
-
 var vows = require('vows'),
     assert = require('assert')
-    user = require('../lib/users.js')(options);
 
+if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_USER 
+    || !process.env.INVALID_PASS || !process.env.DATABASE || !process.env.DB_USER 
+    || !process.env.DB_PASS) {
+    console.log('Usage: Requires env varibles: \n\
+                VALID_USER: Valid user stored in database. \n\
+                VALID_PASS: Users password. \n\
+                INVALID_USER: Invalid user stored in database. \n\
+                INVALID_PASS: Users password. \n\
+                DATABASE: The database to access. \n\
+                DB_USER: A database handler user with read/write. \n\
+                DB_PASS: Database password. \n\n\
+                Optional env varibles: \n\
+                SSL: If ssl is true. \n');
+    process.exit(1);
+}
+
+var validUser = process.env.VALID_USER,
+    validPass = process.env.VALID_PASS,
+    invalidUser = process.env.INVALID_USER,
+    invalidPass = process.env.INVALID_PASS
+
+var options = {
+    db: process.env.DATABASE,
+    name: process.env.DB_USER,
+    pwd: process.env.DB_PASS,
+    ssl: process.env.SSL
+};
+
+var user = require('../lib/users.js')(options);
 
 users = {
     'users.js is loaded': {
@@ -31,7 +52,7 @@ invalid = {
     'calling invalid login': {
         topic: function() {
             var self = this;
-            user.login('test', 'test', function(logged) {
+            user.login(invalidUser, invalidPass, function(logged) {
                 self.callback(null, logged);
             })
         },
@@ -56,7 +77,7 @@ valid = {
     'calling valid login': {
         topic: function() {
             var self = this;
-            user.login('test', 'test123', function(logged) {
+            user.login(validUser, validPass, function(logged) {
                 self.callback(null, logged);
             });
         },
