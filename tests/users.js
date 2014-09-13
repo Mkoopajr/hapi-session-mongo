@@ -3,7 +3,7 @@ var vows = require('vows'),
 
 if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_USER 
     || !process.env.INVALID_PASS || !process.env.DATABASE || !process.env.DB_USER 
-    || !process.env.DB_PASS) {
+    || !process.env.DB_PASS || !process.env.TTL) {
     console.log('Usage: Requires env varibles: \n\
                 VALID_USER: Valid user stored in database. \n\
                 VALID_PASS: Users password. \n\
@@ -11,22 +11,26 @@ if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_U
                 INVALID_PASS: Users password. \n\
                 DATABASE: The database to access. \n\
                 DB_USER: A database handler user with read/write. \n\
-                DB_PASS: Database password. \n\n\
+                DB_PASS: Database password. \n\
+                TTL: Time-to-live for iron cookie. \n\n\
                 Optional env varibles: \n\
                 SSL: If ssl is true. \n');
     process.exit(1);
 }
 
+
 var validUser = process.env.VALID_USER,
     validPass = process.env.VALID_PASS,
     invalidUser = process.env.INVALID_USER,
-    invalidPass = process.env.INVALID_PASS
+    invalidPass = process.env.INVALID_PASS,
+    ttl = Number(process.env.TTL);
 
 var options = {
     db: process.env.DATABASE,
     name: process.env.DB_USER,
     pwd: process.env.DB_PASS,
-    ssl: process.env.SSL
+    ssl: process.env.SSL,
+    ttl: ttl
 };
 
 var user = require('../lib/users.js')(options);
@@ -52,28 +56,59 @@ invalid = {
     'calling invalid login': {
         topic: function() {
             var self = this;
-            user.login(invalidUser, invalidPass, function(logged) {
-                self.callback(null, logged);
+            user.login(invalidUser, invalidPass, function(err, logged) {
+                self.callback(err, logged);
             })
         },
-        'should return false': function(err, logged) {
-            assert.isFalse(logged);
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    },
+    'calling invalid login with invalid cookie': {
+        topic: function() {
+            var self = this;
+            user.get(undefined, function(err, data) {
+                self.callback(err, data);
+            })
         },
-        'getting with invalid cookie': {
-            topic: function(logged) {
-                var self = this;
-                user.get(logged, function(data) {
-                    self.callback(null, data);
-                })
-            },
-            'should return false': function(err, data) {
-                assert.isFalse(data);
-            }
+        'should return error': function(err, data) {
+            assert.isNotNull(err);
         }
     }
 };
 
 valid = {
+    'calling valid login': {
+        topic: function() {
+            var self = this;
+            user.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'with valid cookie': {
+            topic: function(logged) {
+                var self = this;
+                user.get(logged, function(err, data) {
+                    self.callback(err, data);
+                })
+            },
+            'should return true': function(err, data) {
+                assert.isNull(err);
+                assert.isTrue(data);
+            }
+        }
+    }
+};
+
+// Not working I think test calls function before ttl expires then holds the
+// data until timeout and sends back which passes. Instead of waiting for cookie
+// to expire then calling function.
+/*
+cookieTtlTest = {
     'calling valid login': {
         topic: function() {
             var self = this;
@@ -84,18 +119,22 @@ valid = {
         'should return iron cookie': function(logged) {
             assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
         },
-        'getting with valid cookie': {
+        'with timed out cookie': {
             topic: function(logged) {
                 var self = this;
-                user.get(logged, function(data) {
-                    self.callback(null, data);
-                })
+                setTimeout(function() {
+                    user.get(logged, function(data) {
+                        self.callback(null, data);
+                    })
+                }, ttl + 1000)
             },
-            'should return true': function(data) {
-                assert.isTrue(data);
+            'should return false': function(data) {
+                console.log(data);
+                assert.isFalse(data);
             }
         }
     }
 };
+*/
 
 vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).export(module);

@@ -17,9 +17,9 @@ the challenge-response mechanism and require no roles. Requires options:
 - `ttl` - Time-to-live for Iron cookie. Defaults to `0`.
 
 Also exports functions:
-- `user.login(username, password, callback)` - Challenge-response user. Callback is cookie or false.
+- `user.login(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
 - `req.auth.session.set(session)` - Called with login to set server state.
-- `user.get(session, callback)` - Session is cookie. Callback is true or false if still valid.
+- `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
     to be called with the `validateFunc`.
 
 During the `server.auth.strategy` phase `validateFunc(session, callback)` is required.
@@ -31,7 +31,7 @@ var Hapi = require('hapi');
 var server = Hapi.createServer('127.0.0.1', 3000);
 
 server.pack.register({
-    plugin: require('../hapi-session-mongo'),
+    plugin: require('hapi-session-mongo'),
     options: {
         db: 'users',
         name: 'sessionHandler',
@@ -43,8 +43,8 @@ server.pack.register({
 
     server.auth.strategy('session', 'mongo', {
         validateFunc: function(session, callback) {
-            server.plugins['hapi-session-mongo'].user.get(session, function(valid) {
-                return callback(null, valid);
+            server.plugins['hapi-session-mongo'].user.get(session, function(err, `valid) {
+                return callback(err, valid);
             });
         }
     });
@@ -53,10 +53,14 @@ server.pack.register({
 server.route([
     {
         method: 'POST',
-        path: '/banned',
+        path: '/login',
         handler: function (req, res) {
             server.plugins['hapi-session-mongo'].user.login(req.payload.username,
-                req.payload.password, function(logged) {
+                req.payload.password, function(err, logged) {
+                  if (err) {
+                      res('Invalid name or password);
+                  }
+
                   req.auth.session.set(logged);
                   res(logged);
             });
@@ -64,7 +68,7 @@ server.route([
     },
     {
         method: 'GET',
-        path: '/banned',
+        path: '/home',
         config: {
             handler: function(req, res) {
                 res('You are now logged in');
