@@ -21,6 +21,8 @@ Also exports functions:
 - `req.auth.session.set(session)` - Called with login to set server state.
 - `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
     to be called with the `validateFunc`.
+- `user.logout = function(cookie, callback)` - Callback is (err, removed).
+- `req.auth.session.clear()` - Called with logout to clear server state.
 
 During the `server.auth.strategy` phase `validateFunc(session, callback)` is required.
 
@@ -43,7 +45,7 @@ server.pack.register({
 
     server.auth.strategy('session', 'mongo', {
         validateFunc: function(session, callback) {
-            server.plugins['hapi-session-mongo'].user.get(session, function(err, `valid) {
+            server.plugins['hapi-session-mongo'].user.get(session, function(err, valid) {
                 return callback(err, valid);
             });
         }
@@ -58,7 +60,7 @@ server.route([
             server.plugins['hapi-session-mongo'].user.login(req.payload.username,
                 req.payload.password, function(err, logged) {
                   if (err) {
-                      res('Invalid name or password);
+                      res('Invalid name or password');
                   }
 
                   req.auth.session.set(logged);
@@ -72,6 +74,23 @@ server.route([
         config: {
             handler: function(req, res) {
                 res('You are now logged in');
+            },
+            auth: 'session'
+        }
+    },
+    {
+        method: 'GET',
+        path: '/logout',
+        config: {
+            handler: function(req, res) {
+                server.plugins['hapi-session-mongo'].user.logout(req.headers['cookie'], function(err, removed) {
+                    if (err) {
+                        res(err);
+                    }
+
+                    req.auth.session.clear();
+                    res('logged out');
+                });
             },
             auth: 'session'
         }

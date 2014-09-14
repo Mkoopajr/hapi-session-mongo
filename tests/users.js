@@ -46,6 +46,9 @@ users = {
         'has method login': function(topic) {
             assert.isFunction(topic.login);
         },
+        'has method logout': function(topic) {
+            assert.isFunction(topic.logout);
+        },
         'has method get': function(topic) {
             assert.isFunction(topic.get);
         }
@@ -104,6 +107,33 @@ valid = {
     }
 };
 
+logout = {
+    'calling valid login': {
+        topic: function() {
+            var self = this;
+            user.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'then logging out': {
+            topic: function(logged) {
+                var self = this;
+                user.logout(logged, function(err, removed) {
+                    self.callback(err, removed);
+                })
+            },
+            'should return true': function(err, removed) {
+                assert.isNull(err);
+                assert.equal(1, removed);
+            }
+        }
+    }
+};
+
 // Not working I think test calls function before ttl expires then holds the
 // data until timeout and sends back which passes. Instead of waiting for cookie
 // to expire then calling function.
@@ -137,4 +167,4 @@ cookieTtlTest = {
 };
 */
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).export(module);
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).export(module);
