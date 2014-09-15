@@ -5,7 +5,7 @@ services:
     - mongodb
 before_script:
     - sleep 15
-    - tests/setup.sh
+    - ./tests/setup.sh
 env:
     global:
         - "VALID_USER=test"

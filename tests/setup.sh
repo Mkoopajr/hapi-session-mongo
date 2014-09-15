@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 mongo admin --eval 'db.createUser("admin", "admin");'
 mongo test --eval 'db.createUser("test", "test123");'
