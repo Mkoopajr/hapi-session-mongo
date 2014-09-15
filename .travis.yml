@@ -5,9 +5,7 @@ services:
     - mongodb
 before_script:
     - sleep 15
-    - mongo admin --eval 'db.createUser("admin", "admin");'
-    - mongo test --eval 'db.createUser("test", "test123");'
-    - mongo test --eval 'db.createUser("sessionHandler", "supersecretpassword", roles: ["readWrite"]);'
+    - tests/setup.sh
 env:
     global:
         - "VALID_USER=test"
