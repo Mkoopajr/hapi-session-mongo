@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+    - "0.10"
+services:
+    - mongodb
+before_script:
+    - sleep 15
+    - mongo test --eval 'db.addUser('test', 'test123');
+env:
+    - VALID_USER=test
+    - VALID_PASS=test123
+    - INVALID_USER=test
+    - INVALID_PASS=test
+    - DATABASE=test
+    - DB_USER=test
+    - DB_PASS=test
+    - TTL=300
