@@ -5,13 +5,16 @@ services:
     - mongodb
 before_script:
     - sleep 15
-    - mongo test --eval 'db.addUser('test', 'test123');
+    - mongo admin --eval 'db.createUser("admin", "admin");'
+    - mongo test --eval 'db.createUser("test", "test123");'
+    - mongo test --eval 'db.createUser("sessionHandler", "supersecretpassword", roles: ["readWrite"]);'
 env:
-    - VALID_USER=test
-    - VALID_PASS=test123
-    - INVALID_USER=test
-    - INVALID_PASS=test
-    - DATABASE=test
-    - DB_USER=test
-    - DB_PASS=test
-    - TTL=300
+    global:
+        - "VALID_USER=test"
+        - "VALID_PASS=test123"
+        - "INVALID_USER=test"
+        - "INVALID_PASS=test"
+        - "DATABASE=test"
+        - "DB_USER=test"
+        - "DB_PASS=test"
+        - "TTL=300"
