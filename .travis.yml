@@ -13,6 +13,6 @@ env:
         - "INVALID_USER=test"
         - "INVALID_PASS=test"
         - "DATABASE=test"
-        - "DB_USER=test"
-        - "DB_PASS=test"
+        - "DB_USER=sessionHandler"
+        - "DB_PASS=supersecretpassword"
         - "TTL=300"
