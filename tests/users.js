@@ -1,5 +1,6 @@
 var vows = require('vows'),
-    assert = require('assert');
+    assert = require('assert'),
+    Iron = require('iron');
 
 if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_USER 
     || !process.env.INVALID_PASS || !process.env.DATABASE || !process.env.DB_USER 
@@ -17,7 +18,6 @@ if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_U
                 SSL: If ssl is true. \n');
     process.exit(1);
 }
-
 
 var validUser = process.env.VALID_USER,
     validPass = process.env.VALID_PASS,
@@ -41,8 +41,25 @@ var optionsBadHandler = {
     ttl: ttl
 };
 
+var optionsBadDb = {
+    db: process.env.DATABASE,
+    port: 3000,
+    name: process.env.DB_USER,
+    pwd: process.env.DB_PASS,
+    ssl: process.env.SSL,
+    ttl: ttl
+};
+
+// Set up a test cookie that is valid but not stored in database
+// used to check if data null statement of user.get
+var cookie;
+Iron.seal(options, 'test', Iron.defaults, function(err, sealed) {
+    cookie = sealed;
+});
+
 var user = require('../lib/users.js')(options);
 var badUser = require('../lib/users.js')(optionsBadHandler);
+var badDb = require('../lib/users.js')(optionsBadDb);
 
 users = {
     'users.js is loaded': {
@@ -210,7 +227,7 @@ getBadHandler = {
             var self = this;
             user.login(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
-            });
+            })
         },
         'should return iron cookie': function(err, logged) {
             assert.isNull(err);
@@ -256,4 +273,60 @@ logoutBadHandler = {
     }
 };
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).export(module);
+nonexistent = {
+    'getting user with valid cookie not in database': {
+        topic: function() {
+            var self = this;
+            user.get(cookie, function(err, data) {
+                self.callback(err, data);
+            })
+        },
+        'should return error': function(err, data) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginBadDb = {
+    'Logging in to misconfigured DB': {
+        topic: function() {
+            var self = this;
+            badDb.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            })
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+getBadDb = {
+    'Getting misconfigured DB': {
+        topic: function() {
+            var self = this;
+            badDb.get(cookie, function(err, data) {
+                self.callback(err, data);
+            })
+        },
+        'should return error': function(err, data) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+logoutBadDb = {
+    'Getting misconfigured DB': {
+        topic: function() {
+            var self = this;
+            badDb.logout(cookie, function(err, removed) {
+                self.callback(err, removed);
+            })
+        },
+        'should return error': function(err, removed) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).export(module);

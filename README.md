@@ -108,3 +108,20 @@ To enable this, run
     db.sessions.ensureIndex( { "createdAt": 1 }, { expireAfterSeconds: 3600 } )
 
 Mongo will now remove all sessions older than an hour (every 60 seconds).
+
+## Testing
+
+Tests are ran using npm test and require the env variables:
+    `VALID_USER`
+    `VALID_PASS`
+    `INVALID_USER`
+    `INVALID_PASS`
+    `DATABASE`
+    `DB_USER`
+    `DB_PASS`
+    `TTL`
+with optional env variables:
+    `SSL`
+
+If testing on travis you can edit the env variables in .travis.yml and edit your mongodb setup under
+./tests/setup.sh.
