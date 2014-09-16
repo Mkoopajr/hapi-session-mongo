@@ -4,6 +4,8 @@
 
 ## Install
 
+`npm install hapi-session-mongo`
+
 ## Usage
 A session store plugin for hapi and MongoDB. Must have database already set up
 with one user that has readWrite role. All other users in database are just for
