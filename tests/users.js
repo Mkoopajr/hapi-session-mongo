@@ -1,5 +1,5 @@
 var vows = require('vows'),
-    assert = require('assert')
+    assert = require('assert');
 
 if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_USER 
     || !process.env.INVALID_PASS || !process.env.DATABASE || !process.env.DB_USER 
@@ -33,7 +33,16 @@ var options = {
     ttl: ttl
 };
 
+var optionsBadHandler = {
+    db: process.env.DATABASE,
+    name: 'invalid',
+    pwd: 'invalid',
+    ssl: process.env.SSL,
+    ttl: ttl
+};
+
 var user = require('../lib/users.js')(options);
+var badUser = require('../lib/users.js')(optionsBadHandler);
 
 users = {
     'users.js is loaded': {
@@ -134,6 +143,20 @@ logout = {
     }
 };
 
+invalidCookieLogout = {
+    'getting user after logout': {
+        topic: function() {
+            var self = this;
+            user.logout(undefined, function(err, data) {
+                self.callback(err, data);
+            })
+        },
+        'should return error': function(err, data) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
 // Not working I think test calls function before ttl expires then holds the
 // data until timeout and sends back which passes. Instead of waiting for cookie
 // to expire then calling function.
@@ -167,4 +190,70 @@ cookieTtlTest = {
 };
 */
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).export(module);
+loginBadHandler = {
+    'calling valid login with bad handler': {
+        topic: function() {
+            var self = this;
+            badUser.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+getBadHandler = {
+    'calling valid login': {
+        topic: function() {
+            var self = this;
+            user.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'getting user with bad handler': {
+            topic: function(logged) {
+                var self = this;
+                badUser.get(logged, function(err, data) {
+                    self.callback(err, data);
+                })
+            },
+            'should return error': function(err, data) {
+                assert.isNotNull(err);
+            }
+        }
+    }
+};
+
+logoutBadHandler = {
+    'calling valid login': {
+        topic: function() {
+            var self = this;
+            user.login(validUser, validPass, function(err, logged) {
+                self.callback(err, logged);
+            })
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'then calling logout with bad handler': {
+            topic: function(logged) {
+                var self = this;
+                badUser.logout(logged, function(err, removed) {
+                    self.callback(err, removed);
+                })
+            },
+            'logging out with bad handler': function(err, removed) {
+                assert.isNotNull(err);
+            }
+        }
+    }
+};
+
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).export(module);
