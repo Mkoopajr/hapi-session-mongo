@@ -316,7 +316,7 @@ getBadDb = {
 };
 
 logoutBadDb = {
-    'Getting misconfigured DB': {
+    'Logging out of misconfigured DB': {
         topic: function() {
             var self = this;
             badDb.logout(cookie, function(err, removed) {

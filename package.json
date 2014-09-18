@@ -1,7 +1,7 @@
 {
     "name": "hapi-session-mongo",
-    "version": "1.0.0",
-    "description": "Hapi Session Store for Hapijs",
+    "version": "1.0.1",
+    "description": "MongoDB Session Store for Hapijs",
     "author": "Jacob Morton <mkoopajr@gmail.com>",
     "engines": {
         "node": ">=0.10.30"
