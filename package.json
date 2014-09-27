@@ -13,7 +13,8 @@
     "dependencies": {
         "hoek": "~2.4.1",
         "iron": "~2.1.2",
-        "mongodb": "~1.4.10"
+        "mongodb": "~1.4.10",
+        "bcrypt": "~0.8.0"
     },
     "devDependencies": {
         "istanbul": "~0.3.2",

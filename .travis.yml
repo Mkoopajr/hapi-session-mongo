@@ -5,11 +5,14 @@ services:
     - mongodb
 before_script:
     - sleep 15
+    - ./tests/setup2.js
     - ./tests/setup.sh
 env:
     global:
-        - "VALID_USER=test"
-        - "VALID_PASS=test123"
+        - "VALID_CRUSER=test"
+        - "VALID_CRPASS=test123"
+        - "LOCAL_USER=test@test.com"
+        - "LOCAL_PASS=test123"
         - "INVALID_USER=test"
         - "INVALID_PASS=test"
         - "DATABASE=test"

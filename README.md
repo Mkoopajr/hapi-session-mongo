@@ -6,7 +6,18 @@
 
 `npm install hapi-session-mongo`
 
+### Breaking changes from v1 to v2:
+
+`user.login()` no longer exists and is now `user.loginCr()`. Should work the same otherwise.
+
+### New in v2:
+
+`user.loginLocal()` allows user to be stored as document in collection as opposed to MongoDB user.
+requires a schema of `{_id: username, local: {name: username, pwd: password}}` where password is
+hashed using bcrypt.
+
 ## Usage
+
 A session store plugin for hapi and MongoDB. Must have database already set up
 with one user that has readWrite role. All other users in database are just for
 the challenge-response mechanism and require no roles. Requires options:
@@ -19,7 +30,8 @@ the challenge-response mechanism and require no roles. Requires options:
 - `ttl` - Time-to-live for Iron cookie. Defaults to `0`.
 
 Also exports functions:
-- `user.login(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
+- `user.loginCr(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
+- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie).
 - `req.auth.session.set(session)` - Called with login to set server state.
 - `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
     to be called with the `validateFunc`.
@@ -59,7 +71,7 @@ server.route([
         method: 'POST',
         path: '/login',
         handler: function (req, res) {
-            server.plugins['hapi-session-mongo'].user.login(req.payload.username,
+            server.plugins['hapi-session-mongo'].user.loginCr(req.payload.username,
                 req.payload.password, function(err, logged) {
                   if (err) {
                       res('Invalid name or password');
@@ -85,7 +97,8 @@ server.route([
         path: '/logout',
         config: {
             handler: function(req, res) {
-                server.plugins['hapi-session-mongo'].user.logout(req.headers['cookie'], function(err, removed) {
+                server.plugins['hapi-session-mongo'].user.logout(req.headers['cookie'],
+                function(err, removed) {
                     if (err) {
                         res(err);
                     }
@@ -114,8 +127,10 @@ Mongo will now remove all sessions older than an hour (every 60 seconds).
 ## Testing
 
 Tests are ran using npm test and require the env variables:
-- `VALID_USER`
-- `VALID_PASS`
+- `VALID_CRUSER`
+- `VALID_CRPASS`
+- `LOCAL_USER`
+- `LOCAL_PASS`
 - `INVALID_USER`
 - `INVALID_PASS`
 - `DATABASE`

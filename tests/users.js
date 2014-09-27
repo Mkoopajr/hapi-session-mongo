@@ -2,12 +2,14 @@ var vows = require('vows'),
     assert = require('assert'),
     Iron = require('iron');
 
-if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_USER 
-    || !process.env.INVALID_PASS || !process.env.DATABASE || !process.env.DB_USER 
-    || !process.env.DB_PASS || !process.env.TTL) {
-    console.log('Usage: Requires env varibles: \n\
-                VALID_USER: Valid user stored in database. \n\
-                VALID_PASS: Users password. \n\
+if (!process.env.VALID_CRUSER || !process.env.VALID_CRPASS || !process.env.LOCAL_USER
+    || !process.env.LOCAL_PASS || !process.env.INVALID_USER || !process.env.INVALID_PASS
+    || !process.env.DATABASE || !process.env.DB_USER || !process.env.DB_PASS || !process.env.TTL) {
+    console.log('Usage: Requires env variables: \n\
+                VALID_CRUSER: Valid challenge-response user. \n\
+                VALID_CRPASS: Callenge-response users password. \n\
+                LOCAL_USER: Valid user stored in a database. \n\
+                LOCAL_PASS: Password for user stored in a database. \n\
                 INVALID_USER: Invalid user stored in database. \n\
                 INVALID_PASS: Users password. \n\
                 DATABASE: The database to access. \n\
@@ -19,8 +21,10 @@ if (!process.env.VALID_USER || !process.env.VALID_PASS || !process.env.INVALID_U
     process.exit(1);
 }
 
-var validUser = process.env.VALID_USER,
-    validPass = process.env.VALID_PASS,
+var validUser = process.env.VALID_CRUSER,
+    validPass = process.env.VALID_CRPASS,
+    localUser = process.env.LOCAL_USER,
+    localPass = process.env.LOCAL_PASS,
     invalidUser = process.env.INVALID_USER,
     invalidPass = process.env.INVALID_PASS,
     ttl = Number(process.env.TTL);
@@ -69,8 +73,11 @@ users = {
         'is object': function(topic) {
             assert.isObject({user:true});
         },
-        'has method login': function(topic) {
-            assert.isFunction(topic.login);
+        'has method loginCr': function(topic) {
+            assert.isFunction(topic.loginCr);
+        },
+        'has method loginLocal': function(topic) {
+            assert.isFunction(topic.loginLocal);
         },
         'has method logout': function(topic) {
             assert.isFunction(topic.logout);
@@ -82,10 +89,10 @@ users = {
 };
 
 invalid = {
-    'calling invalid login': {
+    'calling invalid loginCr': {
         topic: function() {
             var self = this;
-            user.login(invalidUser, invalidPass, function(err, logged) {
+            user.loginCr(invalidUser, invalidPass, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -93,7 +100,7 @@ invalid = {
             assert.isNotNull(err);
         }
     },
-    'calling invalid login with invalid cookie': {
+    'calling invalid loginCr with invalid cookie': {
         topic: function() {
             var self = this;
             user.get(undefined, function(err, data) {
@@ -107,10 +114,10 @@ invalid = {
 };
 
 valid = {
-    'calling valid login': {
+    'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.login(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -134,10 +141,10 @@ valid = {
 };
 
 logout = {
-    'calling valid login': {
+    'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.login(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -179,10 +186,10 @@ invalidCookieLogout = {
 // to expire then calling function.
 /*
 cookieTtlTest = {
-    'calling valid login': {
+    'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.login(validUser, validPass, function(logged) {
+            user.loginCr(validUser, validPass, function(logged) {
                 self.callback(null, logged);
             });
         },
@@ -208,10 +215,10 @@ cookieTtlTest = {
 */
 
 loginBadHandler = {
-    'calling valid login with bad handler': {
+    'calling valid loginCr with bad handler': {
         topic: function() {
             var self = this;
-            badUser.login(validUser, validPass, function(err, logged) {
+            badUser.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -222,10 +229,10 @@ loginBadHandler = {
 };
 
 getBadHandler = {
-    'calling valid login': {
+    'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.login(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -248,10 +255,10 @@ getBadHandler = {
 };
 
 logoutBadHandler = {
-    'calling valid login': {
+    'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.login(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -291,7 +298,7 @@ loginBadDb = {
     'Logging in to misconfigured DB': {
         topic: function() {
             var self = this;
-            badDb.login(validUser, validPass, function(err, logged) {
+            badDb.loginCr(validUser, validPass, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -329,4 +336,87 @@ logoutBadDb = {
     }
 };
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).export(module);
+loginLocal = {
+    'calling valid loginLocal': {
+        topic: function() {
+            var self = this;
+            user.loginLocal(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'with valid cookie': {
+            topic: function(logged) {
+                var self = this;
+                user.get(logged, function(err, data) {
+                    self.callback(err, data);
+                })
+            },
+            'should return true': function(err, data) {
+                assert.isNull(err);
+                assert.isTrue(data);
+            }
+        }
+    }
+};
+
+loginBadHandlerLocal = {
+    'calling valid loginLocale with bad handler': {
+        topic: function() {
+            var self = this;
+            badUser.loginLocal(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginBadDbLocal = {
+    'Logging in to misconfigured DB local': {
+        topic: function() {
+            var self = this;
+            badDb.loginLocal(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            })
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginLocalInvalidName = {
+    'calling invalid name loginLocal': {
+        topic: function() {
+            var self = this;
+            user.loginLocal(invalidUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginLocalInvalidPass = {
+    'calling invalid pass loginLocal': {
+        topic: function() {
+            var self = this;
+            user.loginLocal(localUser, invalidPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).addBatch(loginLocal).addBatch(loginBadHandlerLocal).addBatch(loginBadDbLocal).addBatch(loginLocalInvalidName).addBatch(loginLocalInvalidPass).export(module);
