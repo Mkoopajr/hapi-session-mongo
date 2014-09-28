@@ -21,7 +21,7 @@
         "vows": "~0.7.0"
     },
     "scripts": {
-        "test": "istanbul cover --print both vows -- --spec ./tests/*.js"
+        "test": "istanbul cover --print both vows -- --spec ./tests/users.js ./tests/hapi-session-mongo.js"
     },
     "licenses": [
         {
