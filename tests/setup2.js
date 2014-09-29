@@ -6,7 +6,7 @@ var Mongo = require('mongodb'),
     Db = Mongo.Db,
     Server = Mongo.Server;
 
-var server = new Server('127.0.0.1', 27017, {ssl: true}),
+var server = new Server('127.0.0.1', 27017),
     db = new Db('test', server, {w: 1});
 
 db.open(function(err, db) {
