@@ -5,8 +5,8 @@ services:
     - mongodb
 before_script:
     - sleep 15
-    - ./tests/setup2.js
     - ./tests/setup.sh
+    - ./tests/setup2.js
 env:
     global:
         - "VALID_CRUSER=test"

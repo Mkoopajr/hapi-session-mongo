@@ -15,31 +15,39 @@ db.open(function(err, db) {
         process.exit(1);
     }
 
-    db.createCollection('users', function(err, collection) {
+    db.authenticate('sessionHandler', 'supersecretpassword', function(err, result) {
         if (err) {
             db.close();
             console.log(err);
             process.exit(1);
         }
 
-        bcrypt.hash('test123', 10, function(err, hash) {
+        db.createCollection('users', function(err, collection) {
             if (err) {
                 db.close();
                 console.log(err);
                 process.exit(1);
             }
 
-            collection.insert([{_id: 'test@test.com', local: {name: 'test@test.com', pwd: hash}}],
-            function(err, data) {
+            bcrypt.hash('test123', 10, function(err, hash) {
                 if (err) {
                     db.close();
                     console.log(err);
                     process.exit(1);
                 }
 
-                db.close();
-                console.log(data);
-                process.exit(0);
+                collection.insert([{_id: 'test@test.com', local: {name: 'test@test.com', pwd: hash}}],
+                function(err, data) {
+                    if (err) {
+                        db.close();
+                        console.log(err);
+                        process.exit(1);
+                    }
+
+                    db.close();
+                    console.log(data);
+                    process.exit(0);
+                });
             });
         });
     });
