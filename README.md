@@ -10,12 +10,6 @@
 
 `user.login()` no longer exists and is now `user.loginCr()`. Should work the same otherwise.
 
-### New in v2:
-
-`user.loginLocal()` allows user to be stored as document in collection as opposed to MongoDB user.
-requires a schema of `{_id: username, local: {name: username, pwd: password}}` where password is
-hashed using bcrypt.
-
 ## Usage
 
 A session store plugin for hapi and MongoDB. Must have database already set up
@@ -31,7 +25,8 @@ the challenge-response mechanism and require no roles. Requires options:
 
 Also exports functions:
 - `user.loginCr(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
-- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie).
+- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie). Requires a schema of `{_id: username, local: {name: username, pwd: password}}`.
+- `user.loginGithub(username, token, callback)` - User stored as a document for Github OAuth. Callback is (err, cookie). Requires a schema of `{_id: username, github: {name: username, pwd: token}}`.
 - `req.auth.session.set(session)` - Called with login to set server state.
 - `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
     to be called with the `validateFunc`.

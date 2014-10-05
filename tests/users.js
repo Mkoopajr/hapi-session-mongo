@@ -79,6 +79,9 @@ users = {
         'has method loginLocal': function(topic) {
             assert.isFunction(topic.loginLocal);
         },
+        'has method loginGithub': function(topic) {
+            assert.isFunction(topic.loginGithub);
+        },
         'has method logout': function(topic) {
             assert.isFunction(topic.logout);
         },
@@ -419,4 +422,73 @@ loginLocalInvalidPass = {
     }
 };
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).addBatch(loginLocal).addBatch(loginBadHandlerLocal).addBatch(loginBadDbLocal).addBatch(loginLocalInvalidName).addBatch(loginLocalInvalidPass).export(module);
+loginGithub = {
+    'calling valid loginGithub': {
+        topic: function() {
+            var self = this;
+            user.loginGithub(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        },
+        'with valid cookie': {
+            topic: function(logged) {
+                var self = this;
+                user.get(logged, function(err, data) {
+                    self.callback(err, data);
+                })
+            },
+            'should return true': function(err, data) {
+                assert.isNull(err);
+                assert.isTrue(data);
+            }
+        }
+    }
+};
+
+loginBadHandlerGithub = {
+    'calling valid loginGithub with bad handler': {
+        topic: function() {
+            var self = this;
+            badUser.loginGithub(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginBadDbGithub = {
+    'Logging in to misconfigured DB localGithub': {
+        topic: function() {
+            var self = this;
+            badDb.loginGithub(localUser, localPass, function(err, logged) {
+                self.callback(err, logged);
+            })
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginGithubInvalid = {
+    'calling invalid loginGithub': {
+        topic: function() {
+            var self = this;
+            user.loginGithub(invalidUser, invalidPass, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).addBatch(loginLocal).addBatch(loginBadHandlerLocal).addBatch(loginBadDbLocal).addBatch(loginLocalInvalidName).addBatch(loginLocalInvalidPass).addBatch(loginGithub).addBatch(loginBadHandlerGithub).addBatch(loginBadDbGithub).addBatch(loginGithubInvalid).export(module);
