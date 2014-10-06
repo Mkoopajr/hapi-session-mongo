@@ -5,7 +5,7 @@ services:
     - mongodb
 before_script:
     - sleep 15
-    - ./tests/setup.sh
+    - ./tests/setup.js
     - ./tests/setup2.js
 env:
     global:

@@ -26,11 +26,11 @@
     "licenses": [
         {
             "type": "BSD",
-            "url": "http://github.com/Mkoopajr/hapi-session-mongo/blob/master/LICENSE"
+            "url": "https://github.com/Mkoopajr/hapi-session-mongo/blob/master/LICENSE"
         }
     ],
     "repository": {
         "type": "git",
-        "url": "http://github.com/Mkoopajr/hapi-session-mongo.git"
+        "url": "https://github.com/Mkoopajr/hapi-session-mongo.git"
     }
 }

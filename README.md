@@ -25,7 +25,7 @@ the challenge-response mechanism and require no roles. Requires options:
 
 Also exports functions:
 - `user.loginCr(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
-- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie). Requires a schema of `{_id: username, local: {name: username, pwd: password}}`.
+- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie). Requires a schema of `{_id: username, local: {name: username, pwd: password}}`. Password must be stored with bcrypt.
 - `user.loginGithub(username, token, callback)` - User stored as a document for Github OAuth. Callback is (err, cookie). Requires a schema of `{_id: username, github: {name: username, pwd: token}}`.
 - `req.auth.session.set(session)` - Called with login to set server state.
 - `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
@@ -64,9 +64,24 @@ server.pack.register({
 server.route([
     {
         method: 'POST',
-        path: '/login',
+        path: '/logincr',
         handler: function (req, res) {
             server.plugins['hapi-session-mongo'].user.loginCr(req.payload.username,
+                req.payload.password, function(err, logged) {
+                  if (err) {
+                      res('Invalid name or password');
+                  }
+
+                  req.auth.session.set(logged);
+                  res(logged);
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/loginlocal',
+        handler: function (req, res) {
+            server.plugins['hapi-session-mongo'].user.loginLocal(req.payload.username,
                 req.payload.password, function(err, logged) {
                   if (err) {
                       res('Invalid name or password');

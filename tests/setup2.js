@@ -6,10 +6,15 @@ var Mongo = require('mongodb'),
     Db = Mongo.Db,
     Server = Mongo.Server;
 
-var server = new Server('127.0.0.1', 27017),
-    db = new Db('test', server, {w: 1});
+var localUser = process.env.LOCAL_USER,
+    localPass = process.env.LOCAL_PASS,
+    dbUser = process.env.DB_USER,
+    dbPass = process.env.DB_PASS,
+    database = process.env.DATABASE;
 
-var password = process.env.LOCAL_PASS;
+
+var server = new Server('127.0.0.1', 27017),
+    db = new Db(database, server, {w: 1});
 
 db.open(function(err, db) {
     if (err) {
@@ -19,7 +24,7 @@ db.open(function(err, db) {
 
     console.log('opened DB');
 
-    db.authenticate('sessionHandler', 'supersecretpassword', function(err, result) {
+    db.authenticate(dbUser, dbPass, function(err, result) {
         if (err) {
             db.close();
             console.log(err);
@@ -37,7 +42,7 @@ db.open(function(err, db) {
 
             console.log('created DB collection');
 
-            bcrypt.hash(password, 10, function(err, hash) {
+            bcrypt.hash(localPass, 10, function(err, hash) {
                 if (err) {
                     db.close();
                     console.log(err);
@@ -46,7 +51,7 @@ db.open(function(err, db) {
 
                 console.log('hashed data');
 
-                collection.insert([{_id: 'test@test.com', local: {name: 'test@test.com', pwd: hash}, github: {name: 'test@test.com', pwd: password}}],
+                collection.insert([{_id: localUser, local: {name: localUser, pwd: hash}, github: {name: localUser, pwd: localPass}}],
                 function(err, data) {
                     if (err) {
                         db.close();
