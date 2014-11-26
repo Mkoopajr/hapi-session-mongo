@@ -21,12 +21,10 @@ if (!process.env.VALID_CRUSER || !process.env.VALID_CRPASS || !process.env.LOCAL
     process.exit(1);
 }
 
-var validUser = process.env.VALID_CRUSER,
-    validPass = process.env.VALID_CRPASS,
-    localUser = process.env.LOCAL_USER,
-    localPass = process.env.LOCAL_PASS,
-    invalidUser = process.env.INVALID_USER,
-    invalidPass = process.env.INVALID_PASS,
+var validUser = {'name': process.env.VALID_CRUSER, 'pwd': process.env.VALID_CRPASS},
+    localUser = {'name': process.env.LOCAL_USER, 'pwd': process.env.LOCAL_PASS},
+    invalidUser = {'name': process.env.INVALID_USER, 'pwd': process.env.INVALID_PASS},
+    badPwdUser = {'name': process.env.LOCAL_USER, 'pwd': 'notapassword'},
     ttl = Number(process.env.TTL);
 
 var options = {
@@ -95,7 +93,7 @@ invalid = {
     'calling invalid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(invalidUser, invalidPass, function(err, logged) {
+            user.loginCr(invalidUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -120,7 +118,7 @@ valid = {
     'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -147,7 +145,7 @@ logout = {
     'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -192,7 +190,7 @@ cookieTtlTest = {
     'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(validUser, validPass, function(logged) {
+            user.loginCr(validUser, function(logged) {
                 self.callback(null, logged);
             });
         },
@@ -221,7 +219,7 @@ loginBadHandler = {
     'calling valid loginCr with bad handler': {
         topic: function() {
             var self = this;
-            badUser.loginCr(validUser, validPass, function(err, logged) {
+            badUser.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -235,7 +233,7 @@ getBadHandler = {
     'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -261,7 +259,7 @@ logoutBadHandler = {
     'calling valid loginCr': {
         topic: function() {
             var self = this;
-            user.loginCr(validUser, validPass, function(err, logged) {
+            user.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -301,7 +299,7 @@ loginBadDb = {
     'Logging in to misconfigured DB': {
         topic: function() {
             var self = this;
-            badDb.loginCr(validUser, validPass, function(err, logged) {
+            badDb.loginCr(validUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -343,7 +341,7 @@ loginLocal = {
     'calling valid loginLocal': {
         topic: function() {
             var self = this;
-            user.loginLocal(localUser, localPass, function(err, logged) {
+            user.loginLocal(localUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -370,7 +368,7 @@ loginBadHandlerLocal = {
     'calling valid loginLocale with bad handler': {
         topic: function() {
             var self = this;
-            badUser.loginLocal(localUser, localPass, function(err, logged) {
+            badUser.loginLocal(localUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -384,7 +382,7 @@ loginBadDbLocal = {
     'Logging in to misconfigured DB local': {
         topic: function() {
             var self = this;
-            badDb.loginLocal(localUser, localPass, function(err, logged) {
+            badDb.loginLocal(localUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -398,7 +396,7 @@ loginLocalInvalidName = {
     'calling invalid name loginLocal': {
         topic: function() {
             var self = this;
-            user.loginLocal(invalidUser, localPass, function(err, logged) {
+            user.loginLocal(invalidUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -412,7 +410,7 @@ loginLocalInvalidPass = {
     'calling invalid pass loginLocal': {
         topic: function() {
             var self = this;
-            user.loginLocal(localUser, invalidPass, function(err, logged) {
+	    user.loginLocal(badPwdUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -426,7 +424,7 @@ loginGithub = {
     'calling valid loginGithub': {
         topic: function() {
             var self = this;
-            user.loginGithub(localUser, localPass, function(err, logged) {
+            user.loginGithub(localUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -453,7 +451,7 @@ loginBadHandlerGithub = {
     'calling valid loginGithub with bad handler': {
         topic: function() {
             var self = this;
-            badUser.loginGithub(localUser, localPass, function(err, logged) {
+            badUser.loginGithub(localUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -467,7 +465,7 @@ loginBadDbGithub = {
     'Logging in to misconfigured DB localGithub': {
         topic: function() {
             var self = this;
-            badDb.loginGithub(localUser, localPass, function(err, logged) {
+            badDb.loginGithub(localUser, function(err, logged) {
                 self.callback(err, logged);
             })
         },
@@ -481,7 +479,7 @@ loginGithubInvalid = {
     'calling invalid loginGithub': {
         topic: function() {
             var self = this;
-            user.loginGithub(invalidUser, invalidPass, function(err, logged) {
+            user.loginGithub(invalidUser, function(err, logged) {
                 self.callback(err, logged);
             });
         },
@@ -491,4 +489,76 @@ loginGithubInvalid = {
     }
 };
 
-vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).addBatch(loginLocal).addBatch(loginBadHandlerLocal).addBatch(loginBadDbLocal).addBatch(loginLocalInvalidName).addBatch(loginLocalInvalidPass).addBatch(loginGithub).addBatch(loginBadHandlerGithub).addBatch(loginBadDbGithub).addBatch(loginGithubInvalid).export(module);
+loginLocalNoPass = {
+    'calling invalid loginLocal with no password': {
+        topic: function() {
+            var self = this;
+	    user.loginLocal({'name': 'test'}, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginCrNoPass = {
+    'calling invalid loginCr with no password': {
+        topic: function() {
+            var self = this;
+	    user.loginCr({'name': 'test'}, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginGithubNoPass = {
+    'calling invalid loginGithub with no password': {
+        topic: function() {
+            var self = this;
+	    user.loginGithub({'name': 'test'}, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return error': function(err, logged) {
+            assert.isNotNull(err);
+        }
+    }
+};
+
+loginLocalWithData = {
+    'calling valid loginLocal with data': {
+        topic: function() {
+            var self = this;
+            user.loginLocal(localUser, {}, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        }
+    }
+};
+
+loginGithubWithData = {
+    'calling valid loginGithub with data': {
+        topic: function() {
+            var self = this;
+            user.loginGithub(localUser, {}, function(err, logged) {
+                self.callback(err, logged);
+            });
+        },
+        'should return iron cookie': function(err, logged) {
+            assert.isNull(err);
+            assert.match(logged, /Fe26[a-zA-Z0-9*._-]/);
+        }
+    }
+};
+
+vows.describe('users.js').addBatch(users).addBatch(invalid).addBatch(valid).addBatch(logout).addBatch(loginBadHandler).addBatch(getBadHandler).addBatch(logoutBadHandler).addBatch(invalidCookieLogout).addBatch(nonexistent).addBatch(loginBadDb).addBatch(getBadDb).addBatch(logoutBadDb).addBatch(loginLocal).addBatch(loginBadHandlerLocal).addBatch(loginBadDbLocal).addBatch(loginLocalInvalidName).addBatch(loginLocalInvalidPass).addBatch(loginGithub).addBatch(loginBadHandlerGithub).addBatch(loginBadDbGithub).addBatch(loginGithubInvalid).addBatch(loginLocalNoPass).addBatch(loginCrNoPass).addBatch(loginGithubNoPass).addBatch(loginLocalWithData).addBatch(loginGithubWithData).export(module);

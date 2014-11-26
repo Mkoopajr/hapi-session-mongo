@@ -6,9 +6,38 @@
 
 `npm install hapi-session-mongo`
 
-### Breaking changes from v1 to v2:
+### Breaking changes from v2 to v3:
 
-`user.login()` no longer exists and is now `user.loginCr()`. Should work the same otherwise.
+All login functions now take a user object as follows `{'name': username, 'pwd': password}`.
+loginLocal and loginGithub now take a object that will be the information sealed in the cookie.
+Say you have a user document:
+
+```
+{
+   '_id': 'username',
+    'local': {
+        'name': 'username',
+        'pwd': 'supersecretpassword'
+    },
+    'data': {
+        'firstn': 'John',
+        'lastn': 'Doe',
+        'phone': '012-345-6789',
+        'email': 'jdoe@test.com'
+    } 
+}
+```
+and you want to seal name, firstn, and email in the cookie you can create a object:
+
+```
+var seal = {
+    'username': 'local.name',
+    'name': 'data.firstn',
+    'email': 'data.email'
+}
+```
+the keys can be anything you want to refer to the data by, where the value should be the string
+literal of the data in the user document. If seal is not passed cookie will just seal username.
 
 ## Usage
 
@@ -24,9 +53,9 @@ the challenge-response mechanism and require no roles. Requires options:
 - `ttl` - Time-to-live for Iron cookie. Defaults to `0`.
 
 Also exports functions:
-- `user.loginCr(username, password, callback)` - Challenge-response user. Callback is (err, cookie).
-- `user.loginLocal(username, password, callback)` - User stored as a document. Callback is (err, cookie). Requires a schema of `{_id: username, local: {name: username, pwd: password}}`. Password must be stored with bcrypt.
-- `user.loginGithub(username, token, callback)` - User stored as a document for Github OAuth. Callback is (err, cookie). Requires a schema of `{_id: username, github: {name: username, pwd: token}}`.
+- `user.loginCr(user, callback)` - Challenge-response user. Callback is (err, cookie).
+- `user.loginLocal(user, seal, callback)` - User stored as a document. Callback is (err, cookie). Requires a schema of `{_id: username, local: {name: username, pwd: password}}`. Password must be stored with bcrypt.
+- `user.loginGithub(user, seal, callback)` - User stored as a document for Github OAuth. Callback is (err, cookie). Requires a schema of `{_id: username, github: {name: username, pwd: token}}`.
 - `req.auth.session.set(session)` - Called with login to set server state.
 - `user.get(session, callback)` - Session is cookie. Callback is (err, valid).
     to be called with the `validateFunc`.
@@ -66,8 +95,8 @@ server.route([
         method: 'POST',
         path: '/logincr',
         handler: function (req, res) {
-            server.plugins['hapi-session-mongo'].user.loginCr(req.payload.username,
-                req.payload.password, function(err, logged) {
+            server.plugins['hapi-session-mongo'].user.loginCr({'name': req.payload.username,
+              'pwd': req.payload.password}, function(err, logged) {
                   if (err) {
                       res('Invalid name or password');
                   }
@@ -81,8 +110,19 @@ server.route([
         method: 'POST',
         path: '/loginlocal',
         handler: function (req, res) {
-            server.plugins['hapi-session-mongo'].user.loginLocal(req.payload.username,
-                req.payload.password, function(err, logged) {
+
+            var user = {
+                'name': req.payload.username,
+                'pwd': req.payload.password
+            };
+
+            var seal = {
+                'username': 'local.name',
+                'name': 'data.firstn',
+                'email': 'data.email'
+            };
+
+            server.plugins['hapi-session-mongo'].user.loginLocal(user, seal, function(err, logged) {
                   if (err) {
                       res('Invalid name or password');
                   }
