@@ -12,6 +12,7 @@
   "main": "./lib/hapi-session-mongo",
   "dependencies": {
     "bcrypt": "~0.8.0",
+    "boom": "^3.2.1",
     "hoek": "~2.4.1",
     "iron": "~2.1.2",
     "mongodb": "^2.1.21"

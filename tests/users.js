@@ -2,6 +2,18 @@ var vows = require('vows'),
     assert = require('assert'),
     Iron = require('iron');
 
+process.env.VALID_CRUSER = 'andrew10111989'
+process.env.VALID_CRPASS= '12345678'
+process.env.LOCAL_USER= 'andrew10111989'
+process.env.LOCAL_PASS= '12345678'
+process.env.INVALID_USER= 'boh'
+process.env.INVALID_PASS= 'wejlyfgkweygfw'
+process.env.DATABASE= 'ubiatar_test'
+process.env.DB_USER= 'admin'
+process.env.DB_PASS= '12345678'
+process.env.TTL= 0
+
+
 if (!process.env.VALID_CRUSER || !process.env.VALID_CRPASS || !process.env.LOCAL_USER
     || !process.env.LOCAL_PASS || !process.env.INVALID_USER || !process.env.INVALID_PASS
     || !process.env.DATABASE || !process.env.DB_USER || !process.env.DB_PASS || !process.env.TTL) {
