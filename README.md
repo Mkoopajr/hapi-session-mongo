@@ -47,6 +47,9 @@ the challenge-response mechanism and require no roles. Requires options:
 - `ip` - The IP address of the database. Defaults to `127.0.0.1`.
 - `port` - The port number of the database. Defaults to `27017`.
 - `db` - The name of the database. Defaults to `test`.
+- `collectionName` - The name of the collection with users name and password data. Defaults to `users`.
+- `nameField` - The name or the path (specified like a pointed string) of the field in the collection to use as the name field. Defaults to `local.name`.
+- `pwdField` - The name or the path (specified like a pointed string) of the field in the collection to use as the password field. Defaults to `local.password`.
 - `name` - The name of the user with readWrite. Defaults to `undefined`.
 - `pwd` - The password of the user with readWrite, also signs Iron cookie. Defaults to `undefined`.
 - `ssl` - MongoDB ssl. Defaults to `false`.

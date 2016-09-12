@@ -1,36 +1,37 @@
 {
-    "name": "hapi-session-mongo",
-    "version": "3.0.1",
-    "description": "MongoDB Session Store for Hapijs",
-    "author": "Jacob Morton <mkoopajr@gmail.com>",
-    "engines": {
-        "node": ">=0.10.30"
-    },
-    "directories": {
-        "lib": "lib"
-    },
-    "main": "./lib/hapi-session-mongo",
-    "dependencies": {
-        "hoek": "~2.4.1",
-        "iron": "~2.1.2",
-        "mongodb": "~1.4.10",
-        "bcrypt": "~0.8.0"
-    },
-    "devDependencies": {
-        "istanbul": "~0.3.2",
-        "vows": "~0.7.0"
-    },
-    "scripts": {
-        "test": "istanbul cover --print both vows -- --spec ./tests/users.js ./tests/hapi-session-mongo.js"
-    },
-    "licenses": [
-        {
-            "type": "BSD",
-            "url": "https://github.com/Mkoopajr/hapi-session-mongo/blob/master/LICENSE"
-        }
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Mkoopajr/hapi-session-mongo.git"
+  "name": "getapper-hapi-session-mongo",
+  "version": "1.0.0",
+  "description": "MongoDB Session Store for Hapijs",
+  "author": "Jacob Morton <mkoopajr@gmail.com>",
+  "engines": {
+    "node": ">=0.10.30"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "main": "./lib/hapi-session-mongo",
+  "dependencies": {
+    "bcrypt": "~0.8.0",
+    "boom": "^3.2.1",
+    "hoek": "~2.4.1",
+    "iron": "~2.1.2",
+    "mongodb": "^2.1.21"
+  },
+  "devDependencies": {
+    "istanbul": "~0.3.2",
+    "vows": "~0.7.0"
+  },
+  "scripts": {
+    "test": "istanbul cover --print both vows -- --spec ./tests/users.js ./tests/hapi-session-mongo.js"
+  },
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://github.com/Mkoopajr/hapi-session-mongo/blob/master/LICENSE"
     }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mkoopajr/hapi-session-mongo.git"
+  }
 }
